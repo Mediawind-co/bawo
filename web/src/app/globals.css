@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #07353B;
+
+  /* Brand Colors */
+  --mint: #55F0AF;
+  --teal: #07353B;
+  --purple: #7029B7;
+  --indigo: #3429B7;
+  --white: #FFFFFF;
+
+  /* Semantic Colors */
+  --primary: var(--mint);
+  --primary-dark: #3DD697;
+  --secondary: var(--teal);
+  --accent: var(--purple);
+  --accent-alt: var(--indigo);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-mint: var(--mint);
+  --color-teal: var(--teal);
+  --color-purple: var(--purple);
+  --color-indigo: var(--indigo);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-accent-alt: var(--accent-alt);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Custom Utilities */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--mint) 0%, var(--purple) 100%);
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, var(--purple) 0%, var(--indigo) 100%);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--mint) 0%, var(--purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
