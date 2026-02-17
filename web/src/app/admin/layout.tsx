@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { AuthProvider, useAuth } from "@/lib/auth-context";
+import { AdminAuthProvider, useAdminAuth } from "@/lib/admin-auth-context";
 import {
   ChartIcon,
   GlobeIcon,
@@ -13,6 +13,7 @@ import {
   HomeIcon,
   MenuIcon,
   XIcon,
+  LogOutIcon,
   LoadingSpinner,
 } from "@/components/icons";
 
@@ -26,16 +27,22 @@ const navItems = [
 function AdminContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isLoading, isAuthenticated } = useAuth();
+  const { admin, isLoading, isAuthenticated, logout } = useAdminAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Skip auth check for login page
+  const isLoginPage = pathname === "/admin/login";
+
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/login");
-    } else if (!isLoading && user?.role !== "admin") {
-      router.push("/learn");
+    if (!isLoading && !isAuthenticated && !isLoginPage) {
+      router.push("/admin/login");
     }
-  }, [isLoading, isAuthenticated, user, router]);
+  }, [isLoading, isAuthenticated, isLoginPage, router]);
+
+  // For login page, just render children
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   if (isLoading) {
     return (
@@ -45,13 +52,18 @@ function AdminContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isAuthenticated || user?.role !== "admin") {
+  if (!isAuthenticated) {
     return null;
   }
 
+  const handleLogout = () => {
+    logout();
+    router.push("/admin/login");
+  };
+
   const isActive = (href: string, exact?: boolean) => {
     if (exact) return pathname === href;
-    return pathname.startsWith(href);
+    return pathname.startsWith(href) && href !== "/admin";
   };
 
   return (
@@ -76,7 +88,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-2">
             {navItems.map((item) => {
-              const active = isActive(item.href, item.exact);
+              const active = item.exact ? pathname === item.href : isActive(item.href);
               return (
                 <Link
                   key={item.href}
@@ -94,14 +106,25 @@ function AdminContent({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          {/* Back to app */}
+          {/* Admin info & logout */}
           <div className="p-4 border-t border-white/10">
+            <div className="px-4 py-2 mb-2">
+              <p className="text-white font-medium truncate">{admin?.name}</p>
+              <p className="text-white/60 text-sm truncate">{admin?.username}</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              <LogOutIcon className="w-5 h-5" />
+              Sign Out
+            </button>
             <Link
-              href="/learn"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+              href="/"
+              className="mt-2 w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
             >
               <HomeIcon className="w-5 h-5" />
-              Back to Learning
+              Back to Site
             </Link>
           </div>
         </div>
@@ -138,7 +161,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         <div className="lg:hidden fixed inset-0 z-40 bg-purple pt-16">
           <nav className="p-4 space-y-2">
             {navItems.map((item) => {
-              const active = isActive(item.href, item.exact);
+              const active = item.exact ? pathname === item.href : isActive(item.href);
               return (
                 <Link
                   key={item.href}
@@ -155,13 +178,20 @@ function AdminContent({ children }: { children: React.ReactNode }) {
                 </Link>
               );
             })}
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              <LogOutIcon className="w-5 h-5" />
+              Sign Out
+            </button>
             <Link
-              href="/learn"
+              href="/"
               onClick={() => setIsMobileMenuOpen(false)}
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
             >
               <HomeIcon className="w-5 h-5" />
-              Back to Learning
+              Back to Site
             </Link>
           </nav>
         </div>
@@ -181,8 +211,8 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
+    <AdminAuthProvider>
       <AdminContent>{children}</AdminContent>
-    </AuthProvider>
+    </AdminAuthProvider>
   );
 }
