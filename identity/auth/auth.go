@@ -7,6 +7,7 @@ import (
 	"encore.dev/beta/auth"
 	"encore.dev/beta/errs"
 
+	"encore.app/admin/adminauth"
 	"encore.app/identity/auth/providers"
 	"encore.app/identity/user"
 )
@@ -77,6 +78,11 @@ func (s *Service) AuthHandler(ctx context.Context, params *AuthParams) (auth.UID
 		return s.handleDevToken(ctx, token)
 	}
 
+	// Check for admin token
+	if strings.HasPrefix(token, "admin_") {
+		return s.handleAdminToken(ctx, token)
+	}
+
 	// Verify token with providers (tries each registered provider)
 	claims, err := s.registry.VerifyAny(ctx, token)
 	if err != nil {
@@ -142,4 +148,23 @@ func (s *Service) handleDevToken(ctx context.Context, token string) (auth.UID, *
 	}
 
 	return auth.UID(devData.UserID), authData, nil
+}
+
+// handleAdminToken validates admin tokens
+func (s *Service) handleAdminToken(ctx context.Context, token string) (auth.UID, *AuthData, error) {
+	admin, ok := adminauth.GetAdminByToken(token)
+	if !ok {
+		return "", nil, ErrInvalidToken
+	}
+
+	// Return auth data from admin token
+	authData := &AuthData{
+		UserID:   admin.ID,
+		Email:    admin.Email,
+		Name:     admin.Name,
+		Role:     "admin",
+		Provider: "admin",
+	}
+
+	return auth.UID(admin.ID), authData, nil
 }

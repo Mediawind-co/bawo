@@ -15,6 +15,7 @@ import {
   XIcon,
   LogOutIcon,
   LoadingSpinner,
+  ShieldIcon,
 } from "@/components/icons";
 
 const navItems = [
@@ -22,6 +23,7 @@ const navItems = [
   { href: "/admin/languages", icon: GlobeIcon, label: "Languages" },
   { href: "/admin/content", icon: BookIcon, label: "Content" },
   { href: "/admin/users", icon: UsersIcon, label: "Users" },
+  { href: "/admin/admins", icon: ShieldIcon, label: "Admins" },
 ];
 
 function AdminContent({ children }: { children: React.ReactNode }) {

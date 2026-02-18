@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/lib/auth-context";
+import { useAdminAuth } from "@/lib/admin-auth-context";
 import { createClient } from "@/lib/api";
 import {
   PlusIcon,
@@ -18,7 +18,7 @@ import type { language, content } from "@/lib/client";
 type ModalType = "unit" | "lesson" | "question" | null;
 
 export default function ContentPage() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const [languages, setLanguages] = useState<language.Language[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [units, setUnits] = useState<content.Unit[]>([]);

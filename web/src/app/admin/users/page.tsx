@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/lib/auth-context";
+import { useAdminAuth } from "@/lib/admin-auth-context";
 import { createClient } from "@/lib/api";
 import {
   TrashIcon,
@@ -10,7 +10,7 @@ import {
 import type { user } from "@/lib/client";
 
 export default function UsersPage() {
-  const { token, user: currentUser } = useAuth();
+  const { token } = useAdminAuth();
   const [users, setUsers] = useState<user.User[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
@@ -44,10 +44,6 @@ export default function UsersPage() {
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     if (!token) return;
-    if (userId === currentUser?.id) {
-      alert("You cannot change your own role");
-      return;
-    }
 
     const client = createClient(token);
     try {
@@ -60,10 +56,6 @@ export default function UsersPage() {
 
   const handleDelete = async (userId: string) => {
     if (!token) return;
-    if (userId === currentUser?.id) {
-      alert("You cannot delete your own account");
-      return;
-    }
     if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
       return;
     }
@@ -149,12 +141,11 @@ export default function UsersPage() {
                     <select
                       value={u.role}
                       onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                      disabled={u.id === currentUser?.id}
                       className={`text-sm px-3 py-1 rounded-lg border ${
                         u.role === "admin"
                           ? "border-purple/30 bg-purple/10 text-purple"
                           : "border-gray-200 bg-gray-50 text-gray-600"
-                      } ${u.id === currentUser?.id ? "cursor-not-allowed opacity-50" : ""}`}
+                      }`}
                     >
                       <option value="user">User</option>
                       <option value="admin">Admin</option>
@@ -164,15 +155,13 @@ export default function UsersPage() {
                     {new Date(u.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    {u.id !== currentUser?.id && (
-                      <button
-                        onClick={() => handleDelete(u.id)}
-                        className="text-gray-400 hover:text-red-600 transition-colors"
-                        title="Delete user"
-                      >
-                        <TrashIcon className="w-5 h-5" />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleDelete(u.id)}
+                      className="text-gray-400 hover:text-red-600 transition-colors"
+                      title="Delete user"
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </button>
                   </td>
                 </tr>
               ))}

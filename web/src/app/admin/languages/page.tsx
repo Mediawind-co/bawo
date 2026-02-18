@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/lib/auth-context";
+import { useAdminAuth } from "@/lib/admin-auth-context";
 import { createClient } from "@/lib/api";
 import {
   PlusIcon,
@@ -13,7 +13,7 @@ import {
 import type { language } from "@/lib/client";
 
 export default function LanguagesPage() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const [languages, setLanguages] = useState<language.Language[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/lib/auth-context";
+import { useAdminAuth } from "@/lib/admin-auth-context";
 import { createClient } from "@/lib/api";
 import {
   UsersIcon,
@@ -13,7 +13,7 @@ import {
 import type { dashboard } from "@/lib/client";
 
 export default function AdminDashboard() {
-  const { token } = useAuth();
+  const { token } = useAdminAuth();
   const [overview, setOverview] = useState<dashboard.OverviewStats | null>(null);
   const [userStats, setUserStats] = useState<dashboard.UserStats | null>(null);
   const [contentStats, setContentStats] = useState<dashboard.ContentStats | null>(null);

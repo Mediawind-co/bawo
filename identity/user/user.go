@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"reflect"
 
 	"encore.dev/beta/auth"
 	"encore.dev/beta/errs"
@@ -44,21 +45,73 @@ func AdminOnly(req middleware.Request, next middleware.Next) middleware.Response
 
 // getRoleFromAuthData extracts role from auth data
 func getRoleFromAuthData(data any) string {
-	// AuthData is defined in the auth package, but we can use reflection or type assertion
-	// For simplicity, we'll use a type assertion with the expected structure
-	if m, ok := data.(interface{ Role() string }); ok {
-		return m.Role()
+	// Use reflection to get Role field from AuthData struct
+	// This works regardless of whether it's a pointer or value
+	if data == nil {
+		return ""
 	}
-	// Try struct field access via reflection-like approach
-	if ad, ok := data.(*struct {
+
+	// Try direct struct access (value type)
+	type authDataStruct struct {
 		UserID   string
 		Email    string
 		Name     string
 		Role     string
 		Provider string
-	}); ok && ad != nil {
+	}
+
+	if ad, ok := data.(*authDataStruct); ok && ad != nil {
 		return ad.Role
 	}
+
+	// Try using reflect for more flexible access
+	// The auth data might come in different forms
+	switch v := data.(type) {
+	case *struct {
+		UserID   string
+		Email    string
+		Name     string
+		Role     string
+		Provider string
+	}:
+		if v != nil {
+			return v.Role
+		}
+	case interface{ GetRole() string }:
+		return v.GetRole()
+	}
+
+	// Last resort: use reflection to find Role field
+	return extractRoleViaReflection(data)
+}
+
+// extractRoleViaReflection uses reflection to extract Role field from any struct
+func extractRoleViaReflection(data any) string {
+	v := reflect.ValueOf(data)
+
+	// Handle pointer types
+	if v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return ""
+		}
+		v = v.Elem()
+	}
+
+	// Must be a struct
+	if v.Kind() != reflect.Struct {
+		return ""
+	}
+
+	// Look for Role field
+	roleField := v.FieldByName("Role")
+	if !roleField.IsValid() {
+		return ""
+	}
+
+	if roleField.Kind() == reflect.String {
+		return roleField.String()
+	}
+
 	return ""
 }
 
