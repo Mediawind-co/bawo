@@ -77,6 +77,11 @@ encore run
 cd web && npm run dev
 ```
 
+## Git Workflow
+- **CI/CD**: Vercel (frontend) + Encore (backend) connected to GitHub
+- **Branch strategy**: Use feature branches for new work, merge to main when complete
+- Create branches like: `feature/admin-management`, `fix/auth-bug`, etc.
+
 ## Work History
 
 ### Session: 2026-02-18
