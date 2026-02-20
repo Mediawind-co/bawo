@@ -35,3 +35,31 @@ func PublishLessonCompleted(session *LessonSession) error {
 	})
 	return err
 }
+
+// MistakeRecordedEvent is published when a user answers a question incorrectly.
+type MistakeRecordedEvent struct {
+	UserID        string    `json:"user_id"`
+	QuestionID    string    `json:"question_id"`
+	LanguageID    string    `json:"language_id"`
+	UserAnswer    string    `json:"user_answer"`
+	CorrectAnswer string    `json:"correct_answer"`
+	Timestamp     time.Time `json:"timestamp"`
+}
+
+// MistakeRecorded is the topic for mistake events.
+var MistakeRecorded = pubsub.NewTopic[*MistakeRecordedEvent]("mistake-recorded", pubsub.TopicConfig{
+	DeliveryGuarantee: pubsub.AtLeastOnce,
+})
+
+// PublishMistakeRecorded publishes a mistake recorded event.
+func PublishMistakeRecorded(userID, questionID, languageID, userAnswer, correctAnswer string) error {
+	_, err := MistakeRecorded.Publish(nil, &MistakeRecordedEvent{
+		UserID:        userID,
+		QuestionID:    questionID,
+		LanguageID:    languageID,
+		UserAnswer:    userAnswer,
+		CorrectAnswer: correctAnswer,
+		Timestamp:     time.Now(),
+	})
+	return err
+}

@@ -452,3 +452,19 @@ func DeleteQuestion(ctx context.Context, id uuid.UUID) error {
 	}
 	return nil
 }
+
+// GetLanguageIDByQuestion retrieves the language ID for a question by joining through lesson and unit.
+func GetLanguageIDByQuestion(ctx context.Context, questionID uuid.UUID) (uuid.UUID, error) {
+	var languageID uuid.UUID
+	err := db.QueryRow(ctx, `
+		SELECT u.language_id
+		FROM questions q
+		JOIN lessons l ON q.lesson_id = l.id
+		JOIN units u ON l.unit_id = u.id
+		WHERE q.id = $1
+	`, questionID).Scan(&languageID)
+	if err != nil {
+		return uuid.Nil, ErrQuestionNotFound
+	}
+	return languageID, nil
+}
