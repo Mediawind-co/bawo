@@ -81,6 +81,12 @@ cd web && npm run dev
 - **CI/CD**: Vercel (frontend) + Encore (backend) connected to GitHub
 - **Branch strategy**: Use feature branches for new work, merge to main when complete
 - Create branches like: `feature/admin-management`, `fix/auth-bug`, etc.
+- **IMPORTANT**: Always create a new branch BEFORE starting work on any feature or fix:
+  ```bash
+  git checkout -b feature/your-feature-name
+  # or
+  git checkout -b fix/your-fix-name
+  ```
 
 ## Work History
 
@@ -107,6 +113,12 @@ cd web && npm run dev
   - Frontend page at `web/src/app/admin/admins/page.tsx`
   - Added ShieldIcon to icons component
   - Added "Admins" navigation link in admin layout
+
+### Session: 2026-02-20
+- **Fixed 404 on learn unit/lesson pages**: Created missing dynamic route pages
+  - Added `web/src/app/(dashboard)/learn/[languageId]/unit/[unitId]/page.tsx` - Unit page showing lessons
+  - Added `web/src/app/(dashboard)/learn/[languageId]/unit/[unitId]/lesson/[lessonId]/page.tsx` - Lesson taking page
+  - Added `ArrowLeftIcon` and `StarIcon` to icons component
 
 ## Important Notes
 - **Two separate auth systems**:
