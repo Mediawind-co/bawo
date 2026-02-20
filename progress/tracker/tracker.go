@@ -22,6 +22,14 @@ var _ = pubsub.NewSubscription(
 	},
 )
 
+// Subscribe to mistake recorded events.
+var _ = pubsub.NewSubscription(
+	lesson.MistakeRecorded, "track-mistakes",
+	pubsub.SubscriptionConfig[*lesson.MistakeRecordedEvent]{
+		Handler: HandleMistakeRecorded,
+	},
+)
+
 // HandleLessonCompleted processes lesson completion events.
 func HandleLessonCompleted(ctx context.Context, event *lesson.LessonCompletedEvent) error {
 	userID, err := uuid.Parse(event.UserID)
@@ -42,6 +50,26 @@ func HandleLessonCompleted(ctx context.Context, event *lesson.LessonCompletedEve
 
 	// Update progress
 	_, err = UpdateProgress(ctx, userID, lessonID, event.XPEarned, score)
+	return err
+}
+
+// HandleMistakeRecorded processes mistake events.
+func HandleMistakeRecorded(ctx context.Context, event *lesson.MistakeRecordedEvent) error {
+	userID, err := uuid.Parse(event.UserID)
+	if err != nil {
+		return nil // Skip invalid events
+	}
+	questionID, err := uuid.Parse(event.QuestionID)
+	if err != nil {
+		return nil
+	}
+	languageID, err := uuid.Parse(event.LanguageID)
+	if err != nil {
+		return nil
+	}
+
+	// Record the mistake
+	_, err = RecordMistake(ctx, userID, questionID, languageID, event.UserAnswer, event.CorrectAnswer)
 	return err
 }
 

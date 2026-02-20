@@ -81,8 +81,12 @@ cd web && npm run dev
 - **CI/CD**: Vercel (frontend) + Encore (backend) connected to GitHub
 - **Branch strategy**: Use feature branches for new work, merge to main when complete
 - Create branches like: `feature/admin-management`, `fix/auth-bug`, etc.
-- **IMPORTANT**: Always create a new branch BEFORE starting work on any feature or fix:
+- **IMPORTANT**: Before starting work on any feature or fix, ALWAYS:
+  1. Switch to main and pull latest changes
+  2. Create a new branch from main
   ```bash
+  git checkout main
+  git pull origin main
   git checkout -b feature/your-feature-name
   # or
   git checkout -b fix/your-fix-name
@@ -119,6 +123,11 @@ cd web && npm run dev
   - Added `web/src/app/(dashboard)/learn/[languageId]/unit/[unitId]/page.tsx` - Unit page showing lessons
   - Added `web/src/app/(dashboard)/learn/[languageId]/unit/[unitId]/lesson/[lessonId]/page.tsx` - Lesson taking page
   - Added `ArrowLeftIcon` and `StarIcon` to icons component
+- **Fixed mistake tracking on wrong answers**: Mistakes were not being saved when users answered incorrectly
+  - Added `GetLanguageIDByQuestion()` helper in `learning/content/repository.go` to get language ID from question
+  - Added `MistakeRecordedEvent` and `MistakeRecorded` pub/sub topic in `learning/lesson/events.go`
+  - Updated `SubmitAnswer()` in `learning/lesson/lesson.go` to publish mistake event on wrong answers
+  - Added `HandleMistakeRecorded()` subscriber in `progress/tracker/tracker.go` to save mistakes to database
 
 ## Important Notes
 - **Two separate auth systems**:

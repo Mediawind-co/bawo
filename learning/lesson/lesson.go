@@ -152,9 +152,21 @@ func SubmitAnswer(ctx context.Context, sessionID string, req *SubmitAnswerReques
 		XPEarned:      result.XPEarned,
 	}
 
-	// Add hint for incorrect answers
+	// Add hint for incorrect answers and record the mistake
 	if !result.IsCorrect {
 		response.Hint = GenerateHint(question, req.Answer)
+
+		// Get language ID and publish mistake event
+		languageID, err := content.GetLanguageIDByQuestion(ctx, qID)
+		if err == nil {
+			_ = PublishMistakeRecorded(
+				userID.String(),
+				qID.String(),
+				languageID.String(),
+				req.Answer,
+				question.CorrectAnswer,
+			)
+		}
 	}
 
 	return response, nil
