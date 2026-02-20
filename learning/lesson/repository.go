@@ -108,25 +108,19 @@ func ListUserSessions(ctx context.Context, userID uuid.UUID, limit, offset int) 
 
 // UpdateSessionProgress updates session progress after an answer.
 func UpdateSessionProgress(ctx context.Context, id uuid.UUID, correct bool, xp int) (*LessonSession, error) {
-	var query string
-	if correct {
-		query = `
-			UPDATE lesson_sessions
-			SET current_index = current_index + 1, correct_count = correct_count + 1, xp_earned = xp_earned + $2, updated_at = NOW()
-			WHERE id = $1
-			RETURNING id, user_id, lesson_id, status, current_index, correct_count, incorrect_count, xp_earned, started_at, completed_at, updated_at
-		`
-	} else {
-		query = `
-			UPDATE lesson_sessions
-			SET current_index = current_index + 1, incorrect_count = incorrect_count + 1, updated_at = NOW()
-			WHERE id = $1
-			RETURNING id, user_id, lesson_id, status, current_index, correct_count, incorrect_count, xp_earned, started_at, completed_at, updated_at
-		`
-	}
+	query := `
+		UPDATE lesson_sessions
+		SET current_index = current_index + 1,
+		    correct_count = correct_count + CASE WHEN $2 THEN 1 ELSE 0 END,
+		    incorrect_count = incorrect_count + CASE WHEN $2 THEN 0 ELSE 1 END,
+		    xp_earned = xp_earned + $3,
+		    updated_at = NOW()
+		WHERE id = $1
+		RETURNING id, user_id, lesson_id, status, current_index, correct_count, incorrect_count, xp_earned, started_at, completed_at, updated_at
+	`
 
 	var session LessonSession
-	err := db.QueryRow(ctx, query, id, xp).Scan(
+	err := db.QueryRow(ctx, query, id, correct, xp).Scan(
 		&session.ID, &session.UserID, &session.LessonID, &session.Status,
 		&session.CurrentIndex, &session.CorrectCount, &session.IncorrectCount,
 		&session.XPEarned, &session.StartedAt, &session.CompletedAt, &session.UpdatedAt,
