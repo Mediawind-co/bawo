@@ -81,8 +81,12 @@ cd web && npm run dev
 - **CI/CD**: Vercel (frontend) + Encore (backend) connected to GitHub
 - **Branch strategy**: Use feature branches for new work, merge to main when complete
 - Create branches like: `feature/admin-management`, `fix/auth-bug`, etc.
-- **IMPORTANT**: Always create a new branch BEFORE starting work on any feature or fix:
+- **IMPORTANT**: Before starting work on any feature or fix, ALWAYS:
+  1. Switch to main and pull latest changes
+  2. Create a new branch from main
   ```bash
+  git checkout main
+  git pull origin main
   git checkout -b feature/your-feature-name
   # or
   git checkout -b fix/your-fix-name
